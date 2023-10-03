@@ -1,0 +1,141 @@
+import mysql.connector
+
+# Conectar a la base de datos
+def conectar_bd():
+    return mysql.connector.connect(user="root", password="root",
+                                   host="localhost",
+                                   database="Serie2Parcial",  # Cambiado el nombre de la base de datos
+                                   port=3306)
+
+# Agregar una nueva tarea con fecha de creación
+def agregar_tarea(descripcion, fecha_creacion):  # Cambiado el nombre de la columna
+    try:
+        conn = conectar_bd()
+        cursor = conn.cursor()
+
+        # Insertar la tarea en la base de datos
+        sql = "INSERT INTO tablaserie2 (Descripción, `Fecha de creación`, completada) VALUES (%s, %s, %s)"  # Cambiado el nombre de la columna
+        val = (descripcion, fecha_creacion, False)
+        cursor.execute(sql, val)
+
+        conn.commit()
+        print("Tarea agregada correctamente")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    finally:
+        if 'conn' in locals():
+            conn.close()
+        if 'cursor' in locals():
+            cursor.close()
+
+# Marcar una tarea como completada
+def marcar_completada(id_tarea):
+    try:
+        conn = conectar_bd()
+        cursor = conn.cursor()
+
+        # Actualizar el estado de la tarea como completada
+        sql = "UPDATE tablaserie2 SET completada = %s WHERE id = %s"  # Cambiado el nombre de la tabla
+        val = (True, id_tarea)
+        cursor.execute(sql, val)
+
+        conn.commit()
+        print("Tarea marcada como completada")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    finally:
+        if 'conn' in locals():
+            conn.close()
+        if 'cursor' in locals():
+            cursor.close()
+
+# Listar todas las tareas pendientes
+def listar_tareas_pendientes():
+    try:
+        conn = conectar_bd()
+        cursor = conn.cursor()
+
+        # Seleccionar todas las tareas pendientes
+        sql = "SELECT id, Descripción FROM tablaserie2 WHERE completada = %s"  # Cambiado el nombre de la columna
+        val = (False,)
+        cursor.execute(sql, val)
+
+        tareas = cursor.fetchall()
+        if not tareas:
+            print("No hay tareas pendientes")
+        else:
+            print("Tareas pendientes:")
+            for tarea in tareas:
+                print(f"{tarea[0]}. {tarea[1]}")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    finally:
+        if 'conn' in locals():
+            conn.close()
+        if 'cursor' in locals():
+            cursor.close()
+
+# Eliminar una tarea
+def eliminar_tarea(id_tarea):
+    try:
+        conn = conectar_bd()
+        cursor = conn.cursor()
+
+        # Eliminar la tarea de la base de datos
+        sql = "DELETE FROM tablaserie2 WHERE id = %s"  # Cambiado el nombre de la tabla
+        val = (id_tarea,)
+        cursor.execute(sql, val)
+
+        conn.commit()
+        print("Tarea eliminada")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    finally:
+        if 'conn' in locals():
+            conn.close()
+        if 'cursor' in locals():
+            cursor.close()
+
+# Función principal
+def main():
+    while True:
+        print("\nMenú:")
+        print("1. Agregar tarea")
+        print("2. Marcar tarea como completada")
+        print("3. Listar tareas pendientes")
+        print("4. Eliminar tarea")
+        print("5. Salir")
+
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == "1":
+            descripcion = input("Ingrese la descripción de la tarea: ")
+            fecha_creacion = input("Ingrese la fecha de creación (YYYY-MM-DD): ")
+            agregar_tarea(descripcion, fecha_creacion)
+        elif opcion == "2":
+            id_tarea = input("Ingrese el ID de la tarea a marcar como completada: ")
+            marcar_completada(id_tarea)
+        elif opcion == "3":
+            listar_tareas_pendientes()
+        elif opcion == "4":
+            id_tarea = input("Ingrese el ID de la tarea a eliminar: ")
+            eliminar_tarea(id_tarea)
+        elif opcion == "5":
+            print("¡Hasta luego!")
+            break
+        else:
+            print("Opción no válida. Intente nuevamente.")
+
+if __name__ == "__main__":
+    main()
+
+
+
